@@ -137,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showRepayment();
                 break;
         }
-
     }
 
     // 根据购房总价和按揭比例，计算贷款总额
@@ -212,37 +211,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return bd.toString();
     }
 
-//    // 根据贷款金额、还款年限、基准利率，计算还款信息
-//    public Repayment calMortgage(double loadAmount, double loanYear, double rate, double, boolean bInterest) {
-//
-//        Repayment result = new Repayment();
-//        return result;
-//    }
+    // 根据贷款金额、还款年限、基准利率，计算还款信息
+    public Repayment calMortgage(double loadAmount, double loanMonths, double rate, boolean bInterest) {
 
-    private Repayment calMortgage(double ze, double nx, double rate, boolean bInterest) {
-        double zem = (ze * rate / 12 * Math.pow((1 + rate / 12), nx))
-                / (Math.pow((1 + rate / 12), nx) - 1);
-        double amount = zem * nx;
-        double rateAmount = amount - ze;
+        // 等额本息
+        double amountMonth = (loadAmount * rate / 12 * Math.pow((1 + rate / 12), loanMonths)) / (Math.pow((1 + rate / 12), loanMonths) - 1);
+        double amount = amountMonth * loanMonths;
+        double rateAmount = amount - loadAmount;
 
-        double benjinm = ze / nx;
-        double lixim = ze * (rate / 12);
-        double diff = benjinm * (rate / 12);
-        double huankuanm = benjinm + lixim;
-        double zuihoukuan = diff + benjinm;
-        double av = (huankuanm + zuihoukuan) / 2;
-        double zong = av * nx;
-        double zongli = zong - ze;
+        // 等额本金 每月还款本金、每月还款利息、每月还款、每月利息差额
+        double principalMonth = loadAmount / loanMonths;
+        double interestMonth = loadAmount * (rate / 12);
+        double repaymentMonth = principalMonth + interestMonth;
+        double diff = principalMonth * (rate / 12);
+        double realMonthPrincipal = principalMonth + diff;
+        double av = (realMonthPrincipal + repaymentMonth) / 2;
+        double total = av * loanMonths;
+        double totalInterest = total - loadAmount;
 
         Repayment result = new Repayment();
-        result.mTotal = ze;
         if (bInterest) {
-            result.mMonthRepayment = zem;
+            result.mMonthRepayment = amountMonth;
             result.mTotalInterest = rateAmount;
         } else {
-            result.mMonthRepayment = huankuanm;
+            result.mMonthRepayment = repaymentMonth;
             result.mMonthMinus = diff;
-            result.mTotalInterest = zongli;
+            result.mTotalInterest = totalInterest;
         }
         return result;
     }
